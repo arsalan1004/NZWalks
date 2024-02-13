@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NZWalks.Data;
+using NZWalks.Models.Domains;
 using NZWalks.Models.DTO;
 
 namespace NZWalks.Controllers.RegionsControllers;
@@ -57,5 +58,21 @@ public class RegionsController : Controller
             RegionImageURL = region.RegionImageURL
         };
         return Ok(regionDto);
+    }
+    
+    // POST a region
+    [HttpPost]
+    public IActionResult InsertRegion([FromBody] AddRegionDto region)
+    {
+        var regionDomainModel = new Region
+        {
+            Code = region.Code,
+            Name = region.Name,
+            RegionImageURL = region.RegionImageURL
+        };
+        dbContext.Regions.Add(regionDomainModel);
+        dbContext.SaveChanges();
+
+        return Created("Success", regionDomainModel);
     }
 }
