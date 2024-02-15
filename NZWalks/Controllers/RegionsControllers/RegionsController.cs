@@ -24,18 +24,8 @@ public class RegionsController : Controller
     {
         var regionsDomain = dbContext.Regions.ToList();
 
-        var regionsDto = new List<RegionDto>();
+        var regionsDto = regionsDomain.Select(region => new RegionDto { Id = region.Id, Code = region.Code, Name = region.Name, RegionImageURL = region.RegionImageURL }).ToList();
 
-        foreach (var region in regionsDomain)
-        {
-            regionsDto.Add(new RegionDto
-            {
-                Id = region.Id,
-                Code = region.Code,
-                Name = region.Name,
-                RegionImageURL = region.RegionImageURL
-            });
-        }
         return Ok(regionsDto);
     }
     
@@ -50,15 +40,13 @@ public class RegionsController : Controller
         {
             return NotFound();
         }
-
-        var regionDto = new RegionDto
+        return Ok(new RegionDto
         {
             Id = region.Id,
             Code = region.Code,
             Name = region.Name,
             RegionImageURL = region.RegionImageURL
-        };
-        return Ok(regionDto);
+        });
     }
     
     // POST a region
@@ -92,13 +80,10 @@ public class RegionsController : Controller
     // Update a Region
     [HttpPut]
     [Route("{id:guid}")]
-    public IActionResult UpdateRegion([FromRoute] Guid id, [FromBody] Region region)
+    public IActionResult UpdateRegion([FromRoute] Guid id, [FromBody] AddRegionDto region)
     {
-        if (id != region.Id)
-        {
-            return BadRequest("Invalid Id");
-        }
-
+        var regionFromDb = dbContext.Regions.Find(id);
+        if (regionFromDb is null) return BadRequest();
         dbContext.Entry(region).State = EntityState.Modified;
         dbContext.SaveChanges();
         return NoContent();
