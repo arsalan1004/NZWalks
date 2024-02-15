@@ -9,12 +9,12 @@ namespace NZWalks.Controllers.RegionsControllers;
 [ApiController]
 public class RegionsController : Controller
 {
-    private readonly NZWalksDbContext dbContext;
+    private readonly NZWalksDbContext _dbContext;
     
     // Constructor to initialize the db context for further use
     public RegionsController(NZWalksDbContext dbOptions)
     {
-        this.dbContext = dbOptions;
+        this._dbContext = dbOptions;
     }
     
     // GET all Regions
@@ -22,7 +22,7 @@ public class RegionsController : Controller
     [HttpGet]
     public IActionResult GetAllRegions()
     {
-        var regionsDomain = dbContext.Regions.ToList();
+        var regionsDomain = _dbContext.Regions.ToList();
 
         var regionsDto = regionsDomain.Select(region => new RegionDto { Id = region.Id, Code = region.Code, Name = region.Name, RegionImageURL = region.RegionImageURL }).ToList();
 
@@ -34,7 +34,7 @@ public class RegionsController : Controller
     [Route("{id:guid}")]
     public IActionResult GetRegById([FromRoute] Guid id)
     {
-        var region = dbContext.Regions.Find(id);
+        var region = _dbContext.Regions.Find(id);
 
         if (region == null)
         {
@@ -59,10 +59,10 @@ public class RegionsController : Controller
             Name = region.Name,
             RegionImageURL = region.RegionImageURL
         };
-        dbContext.Regions.Add(regionDomainModel);
-        dbContext.SaveChanges();
+        _dbContext.Regions.Add(regionDomainModel);
+        _dbContext.SaveChanges();
 
-        return Created("Success", regionDomainModel);
+        return CreatedAtAction(nameof(GetRegById), new {id = regionDomainModel.Id}, region);
     }
     
     // Delete a Region
@@ -70,10 +70,10 @@ public class RegionsController : Controller
     [Route("{id:guid}")]
     public IActionResult DeleteRegion([FromRoute] Guid id)
     {
-        var region = dbContext.Regions.Find(id);
+        var region = _dbContext.Regions.Find(id);
         if (region is null) return BadRequest("Region to delete does not exist");
-        dbContext.Regions.Remove(region);
-        dbContext.SaveChanges();
+        _dbContext.Regions.Remove(region);
+        _dbContext.SaveChanges();
         return Ok("Successfully Deleted");
     }
     
@@ -82,10 +82,10 @@ public class RegionsController : Controller
     [Route("{id:guid}")]
     public IActionResult UpdateRegion([FromRoute] Guid id, [FromBody] AddRegionDto region)
     {
-        var regionFromDb = dbContext.Regions.Find(id);
+        var regionFromDb = _dbContext.Regions.Find(id);
         if (regionFromDb is null) return BadRequest();
-        dbContext.Entry(region).State = EntityState.Modified;
-        dbContext.SaveChanges();
+        _dbContext.Entry(region).State = EntityState.Modified;
+        _dbContext.SaveChanges();
         return NoContent();
     }
 }
