@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NZWalks.Data;
 using NZWalks.Models.Domains;
 using NZWalks.Models.DTO;
@@ -74,5 +75,32 @@ public class RegionsController : Controller
         dbContext.SaveChanges();
 
         return Created("Success", regionDomainModel);
+    }
+    
+    // Delete a Region
+    [HttpDelete]
+    [Route("{id:guid}")]
+    public IActionResult DeleteRegion([FromRoute] Guid id)
+    {
+        var region = dbContext.Regions.Find(id);
+        if (region is null) return BadRequest("Region to delete does not exist");
+        dbContext.Regions.Remove(region);
+        dbContext.SaveChanges();
+        return Ok("Successfully Deleted");
+    }
+    
+    // Update a Region
+    [HttpPut]
+    [Route("{id:guid}")]
+    public IActionResult UpdateRegion([FromRoute] Guid id, [FromBody] Region region)
+    {
+        if (id != region.Id)
+        {
+            return BadRequest("Invalid Id");
+        }
+
+        dbContext.Entry(region).State = EntityState.Modified;
+        dbContext.SaveChanges();
+        return NoContent();
     }
 }
